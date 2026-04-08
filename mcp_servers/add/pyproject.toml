@@ -1,12 +1,9 @@
 [project]
-name = "ai-agent"
+name = "add"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "dotenv==0.9.9",
-    "google-genai==1.12.1",
-    "litellm==1.83.4",
-    "mcp==1.27.0",
+    "fastmcp>=3.1.1",
 ]

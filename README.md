@@ -13,12 +13,23 @@ Copy `.env.example` to `.env` and add your API keys.
 
 ## Run
 
-**Anthropic (claude-haiku-4-5):**
+1. **Anthropic (claude-haiku-4-5) with MCP support**
+First run the power mcp in a separate shell
+```bash
+cd mcp_servers/power
+uv synv
+uv run main.py
+```
+Then
+```bash
+uv run single_litellm_with_mcp.py "Compute (a) 2 + 5, (b) 5 to the power of 3"
+```
+2. **Anthropic (claude-haiku-4-5):**
 ```bash
 uv run single_litellm.py "your prompt here"
 ```
 
-**Google Gemini (gemini-2.5-flash):**
+3. **Google Gemini (gemini-2.5-flash):**
 ```bash
 uv run single_genai.py "your prompt here"
 ```
