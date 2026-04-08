@@ -6,7 +6,6 @@
 
 ```bash
 uv sync
-source .venv/bin/activate
 ```
 
 Copy `.env.example` to `.env` and add your API keys.
@@ -14,11 +13,18 @@ Copy `.env.example` to `.env` and add your API keys.
 ## Run
 
 1. **Anthropic (claude-haiku-4-5) with MCP support**
-First run the power mcp in a separate shell
+First install dependencies for the add MCP server:
+```bash
+cd mcp_servers/add
+uv sync
+cd -
+```
+Then run the power mcp in a separate shell (or move it to background like below)
 ```bash
 cd mcp_servers/power
-uv synv
-uv run main.py
+uv sync
+uv run main.py &
+cd -
 ```
 Then
 ```bash
@@ -50,3 +56,7 @@ Change the precedence of + operator to 3 in `calculator/pkg/calculator.py`, then
 ```bash
 uv run single_litellm.py "The calculator returns wrong results. Confirm, fix, test and report to me the cause of the problem."
 ```
+
+## Development
+
+For development remember about virtual environment activation in your IDE.
