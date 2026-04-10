@@ -32,9 +32,9 @@ from contextlib import AsyncExitStack
 from dataclasses import dataclass
 
 # TODO: sth is fucked here when the final model response is sent for tracing, investigate
-# import litellm
-# litellm.callbacks = ["langsmith"]
-# litellm.langsmith_batch_size = 1
+import litellm
+litellm.callbacks = ["langsmith"]
+litellm.langsmith_batch_size = 1
 
 @dataclass
 class McpServerConfig:
@@ -120,16 +120,14 @@ class McpManager:
     async def close(self):
         await self.exit_stack.aclose()
 
+from langsmith import traceable
+from langsmith.run_trees import RunTree
+from langsmith.run_helpers import get_current_run_tree
 
-async def main():
-    mcp_manager = McpManager()
-    await mcp_manager.initialize()
-    tools = mcp_manager.get_mcp_tools()
-    available_tools.extend(tools)
-    finished = False
-    # limit to 20 exchanges to avoid excesive cost
-    # import litellm
-    # litellm.set_verbose = True
+# litellm.set_verbose = True
+import uuid 
+session_id = str(uuid.uuid7())
+async def run_agent_turn(available_tools: list, mcp_manager: McpManager):
     for _ in range(20):
         response = await acompletion(
             # model="anthropic/claude-sonnet-4-6",
@@ -138,6 +136,11 @@ async def main():
             tools=available_tools,
             tool_choice="auto",
             temperature=0.2,
+            metadata={
+                "metadata": {
+                    "session_id": session_id
+                }
+            }
         )
 
         if args.verbose:
@@ -148,7 +151,7 @@ async def main():
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         if tool_calls:
-            messages.append(response_message)
+            messages.append(response_message.model_dump())
             for tool_call in tool_calls:
                 if tool_call.function.name.startswith("mcp__"):
                     fn_res = await mcp_manager.call_mcp_tool(tool_call)
@@ -157,8 +160,18 @@ async def main():
                 messages.append(fn_res)
         else:
             print(response_message.content)
-            finished = True
-            break
+            return True
+    return False
+
+
+from datetime import datetime, timezone
+async def main():
+    mcp_manager = McpManager()
+    await mcp_manager.initialize()
+    tools = mcp_manager.get_mcp_tools()
+    available_tools.extend(tools)
+    # limit to 20 exchanges to avoid excesive cost
+    finished = await run_agent_turn(available_tools, mcp_manager)
     await mcp_manager.close()
     if not finished:
         print("Reached maximum number of iterations without finishing the conversation.")

@@ -60,3 +60,7 @@ uv run single_litellm.py "The calculator returns wrong results. Confirm, fix, te
 ## Development
 
 For development remember about virtual environment activation in your IDE.
+
+## LangSmith tracing
+
+To get LangSmith traces, set `LANGSMITH_API_KEY` in your `.env` file.
