@@ -1,3 +1,8 @@
+# check after updating dependencies if pydantic still loses its shit
+import warnings
+warnings.filterwarnings("ignore", module="pydantic")
+warnings.filterwarnings("ignore", module="langchain_core._api.deprecation")
+
 import argparse
 parser = argparse.ArgumentParser(description="Chatbot")
 _ = parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
@@ -45,10 +50,13 @@ async def main():
     agent = create_agent(llm, system_prompt=SystemMessage(system_prompt), tools=tools, checkpointer=InMemorySaver())
     thread_id = uuid.uuid7()
     while True:
-        prompt = input("> ")
+        try:
+            prompt = input("> ")
+        except EOFError:
+            break
         response = await agent.ainvoke({"messages":[HumanMessage(prompt)]}, {"configurable": {"thread_id": thread_id}, "metadata": {"thread_id": thread_id}})
         print(response["messages"][-1].content)
-
+    print("\nExiting...")
 
 if __name__ == "__main__":
     import asyncio
